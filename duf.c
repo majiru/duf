@@ -42,7 +42,6 @@ sudoku(void*, char*)
 	int i;
 	for(i=0;i<numprocs;i++)
 		kill(children[i]);
-	threadexits(nil);
 	return 0;
 }
 
@@ -116,13 +115,7 @@ threadmain(int argc, char **argv)
 		recv(cpid, children+i);
 	}
 
-	for(;;)
-		//The program can not be blocked when the notify handler is called.
-		//So instead we just busy wait on the channel.
-		if(nbrecv(waitchan, &m) != 0){
+	for(i=0;i<numprocs;i++)
+		if(recv(waitchan, &m) == 1)
 			print("Pid %d exited with msg: %s\n", m->pid, m->msg);
-			if(--i == 0)
-				threadexits(nil);
-		}else
-			sleep(2000);
 }
